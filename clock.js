@@ -9,21 +9,26 @@ let breakLength = document.getElementById("break-length");
 let sessionLength = document.getElementById("session-length");
 let timeLeft = document.getElementById("time-left");
 
+let timerLabel = document.getElementById("timer-label");
+
 let timer = 0;
 let timerStatus = "begin";
+let currentTimer = "Session";
 
 // Session Length +
 sessionIncrementButton.addEventListener("click", function () {
   if (timerStatus === "begin" || timerStatus === "stopped") {
-    sessionLength.innerText = parseInt(sessionLength.innerText) + 1;
-    time(sessionLength);
+    if (sessionLength.innerText < 60) {
+      sessionLength.innerText = parseInt(sessionLength.innerText) + 1;
+      time(sessionLength);
+    }
   }
 });
 
 // Session Length -
 sessionDecrementButton.addEventListener("click", function () {
   if (timerStatus === "begin" || timerStatus === "stopped") {
-    if (sessionLength.innerText > 0) {
+    if (sessionLength.innerText > 1) {
       sessionLength.innerText = parseInt(sessionLength.innerText) - 1;
       time(sessionLength);
     }
@@ -32,12 +37,15 @@ sessionDecrementButton.addEventListener("click", function () {
 
 // Break Length +
 breakIncrementButton.addEventListener("click", function () {
-  breakLength.innerText = parseInt(breakLength.innerText) + 1;
+  if (breakLength.innerText < 60) {
+    breakLength.innerText = parseInt(breakLength.innerText) + 1;
+  }
+  
 });
 
 // Break Length -
 breakDecrementButton.addEventListener("click", function () {
-  if (breakLength.innerText > 0) {
+  if (breakLength.innerText > 1) {
     breakLength.innerText = parseInt(breakLength.innerText) - 1;
   }
 });
@@ -63,7 +71,10 @@ resetButton.addEventListener("click", function () {
   console.log("interval cleared");
   clearInterval(timer);
   timeLeft.innerText = "25:00";
+  sessionLength.innerText = 25;
+  breakLength.innerText = 5;
   timerStatus = "stopped";
+  timerLabel.innerText = "Session"
 });
 
 // Countdown function
@@ -72,24 +83,42 @@ function decrementTime(timeString) {
   let minuteDisplay = parseInt(timeDisplay[0]);
   let secondDisplay = parseInt(timeDisplay[1]);
 
-  secondDisplay -= 1;
+  if (minuteDisplay == 0 && secondDisplay == 0) {
+    if (currentTimer === "Session") {
+      currentTimer = "Break";
+      minuteDisplay = breakLength.innerText;
+      timerLabel.innerText = currentTimer;
+      console.log(breakLength.innerText);
+    } else {
+      currentTimer = "Session";
+      minuteDisplay = sessionLength.innerText;
+      timerLabel.innerText = currentTimer;
+    }
+  } else {
+    secondDisplay -= 1;
+  }
+
 
   if (secondDisplay === -1) {
     secondDisplay = 59;
     minuteDisplay -= 1;
   }
 
+  // maintain double digit format
   if (secondDisplay <= 9) {
     secondDisplay = "0" + secondDisplay;
   }
+  if (minuteDisplay <= 9) {
+    minuteDisplay = "0" + minuteDisplay;
+  }
 
-  console.log(secondDisplay);
+  console.log(currentTimer);
 
   return minuteDisplay + ":" + secondDisplay;
 }
 
-function time(sessionLength) {
-  let clockCount = Math.floor(parseInt(sessionLength.innerText) * 60);
+function time(length) {
+  let clockCount = Math.floor(parseInt(length.innerText) * 60);
   let minutes = clockCount / 60;
   timeLeft.innerText = minutes + ":" + "00";
   console.log(minutes);
